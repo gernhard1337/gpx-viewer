@@ -601,3 +601,43 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .gpx-viewer-marker-waypoint {
 	background: #3388ff;
 }
+
+.gpx-viewer-file-view {
+	padding: var(--size-4-4);
+}
+
+.gpx-viewer-stats {
+	display: flex;
+	gap: var(--size-4-4);
+	margin-top: var(--size-4-2);
+	font-size: var(--font-ui-medium);
+}
+
+.gpx-viewer-error {
+	color: var(--text-error);
+	padding: var(--size-4-4);
+}
+
+.gpx-viewer-embed {
+	margin: var(--size-4-2) 0;
+}
+
+.gpx-viewer-embed-stats {
+	margin-top: var(--size-4-1);
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+}
+
+.gpx-viewer-source-link {
+	display: inline-block;
+	margin-top: var(--size-4-3);
+	padding: var(--size-4-1) var(--size-4-3);
+	border-radius: var(--radius-s);
+	background: var(--interactive-normal);
+	color: var(--text-normal);
+	text-decoration: none;
+}
+
+.gpx-viewer-source-link:hover {
+	background: var(--interactive-hover);
+}

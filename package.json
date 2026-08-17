@@ -1,9 +1,8 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "gpx-viewer",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Obsidian plugin to visualize .gpx track files on a Leaflet map.",
 	"main": "main.js",
-	"type": "module",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
