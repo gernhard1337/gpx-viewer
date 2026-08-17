@@ -26,7 +26,11 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 		super(containerEl);
 	}
 
-	async onload(): Promise<void> {
+	onload(): void {
+		void this.render();
+	}
+
+	private async render(): Promise<void> {
 		this.containerEl.addClass('gpx-viewer-embed');
 
 		const cache = this.plugin.gpxFileCache;
