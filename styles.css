@@ -572,6 +572,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 .gpx-viewer-map {
 	width: 100%;
+	min-width: 200px;
 	border-radius: 4px;
 }
 
@@ -645,6 +646,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .gpx-viewer-elevation-chart {
 	position: relative;
 	height: 180px;
+	min-width: 200px;
 	margin-top: var(--size-4-4);
 }
 

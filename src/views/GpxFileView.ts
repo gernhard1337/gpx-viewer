@@ -1,17 +1,14 @@
 import { FileView, TFile, WorkspaceLeaf } from 'obsidian';
+import type GpxViewerPlugin from '../main';
 import { parseGpx } from '../gpx/parser';
 import { calculateStats, GpxStats } from '../gpx/stats';
 import { GpxData } from '../gpx/models';
+import { formatDistance, formatElevation } from '../gpx/units';
 import { MapRenderer } from './MapRenderer';
-import { DEFAULT_TILE_URL, DEFAULT_ATTRIBUTION } from './mapDefaults';
-import { GpxFileCache } from '../cache/gpxFileCache';
 import { getSourceLink } from '../external/sourceLink';
 import { ElevationChart } from './ElevationChart';
 
 export const VIEW_TYPE_GPX = 'gpx-file-view';
-
-// TODO(step 8): read from plugin settings instead of this constant.
-const SHOW_ELEVATION_CHART = true;
 
 export class GpxFileView extends FileView {
 	private mapRenderer: MapRenderer | null = null;
@@ -19,7 +16,7 @@ export class GpxFileView extends FileView {
 
 	constructor(
 		leaf: WorkspaceLeaf,
-		private cache: GpxFileCache,
+		private plugin: GpxViewerPlugin,
 	) {
 		super(leaf);
 	}
@@ -62,7 +59,8 @@ export class GpxFileView extends FileView {
 		contentEl.empty();
 		contentEl.addClass('gpx-viewer-file-view');
 
-		const cached = this.cache.get(file.path, file.stat.mtime);
+		const cache = this.plugin.gpxFileCache;
+		const cached = cache.get(file.path, file.stat.mtime);
 
 		let data: GpxData;
 		let stats: GpxStats;
@@ -93,38 +91,45 @@ export class GpxFileView extends FileView {
 			}
 
 			stats = calculateStats(data.points);
-			this.cache.set(file.path, file.stat.mtime, { data, stats });
+			cache.set(file.path, file.stat.mtime, { data, stats });
 		}
+
+		const { tileUrl, tileAttribution, units, showElevationChart } =
+			this.plugin.settings;
 
 		const mapEl = contentEl.createDiv();
 		this.mapRenderer = new MapRenderer({
 			container: mapEl,
 			data,
 			compact: false,
-			tileUrl: DEFAULT_TILE_URL,
-			attribution: DEFAULT_ATTRIBUTION,
+			tileUrl,
+			attribution: tileAttribution,
 		});
 
 		this.renderStats(contentEl, stats);
 		this.renderSourceLink(contentEl, data);
 
-		if (SHOW_ELEVATION_CHART) {
+		if (showElevationChart) {
 			const chartEl = contentEl.createDiv();
 			this.elevationChart = new ElevationChart({
 				container: chartEl,
 				points: data.points,
+				units,
 			});
 		}
 	}
 
 	private renderStats(container: HTMLElement, stats: GpxStats): void {
+		const { units } = this.plugin.settings;
 		const statsEl = container.createDiv({ cls: 'gpx-viewer-stats' });
-		statsEl.createSpan({ text: `Distanz: ${stats.distanceKm.toFixed(2)} km` });
 		statsEl.createSpan({
-			text: `Anstieg: ${Math.round(stats.elevationGainM)} m`,
+			text: `Distanz: ${formatDistance(stats.distanceKm, units)}`,
 		});
 		statsEl.createSpan({
-			text: `Abstieg: ${Math.round(stats.elevationLossM)} m`,
+			text: `Anstieg: ${formatElevation(stats.elevationGainM, units)}`,
+		});
+		statsEl.createSpan({
+			text: `Abstieg: ${formatElevation(stats.elevationLossM, units)}`,
 		});
 	}
 

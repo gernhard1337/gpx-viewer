@@ -5,16 +5,13 @@ import {
 	MarkdownRenderChild,
 	TFile,
 } from 'obsidian';
+import type GpxViewerPlugin from '../main';
 import { parseGpx } from '../gpx/parser';
 import { calculateStats, GpxStats } from '../gpx/stats';
 import { GpxData } from '../gpx/models';
+import { formatDistance, formatElevation } from '../gpx/units';
 import { MapRenderer } from '../views/MapRenderer';
-import { DEFAULT_TILE_URL, DEFAULT_ATTRIBUTION } from '../views/mapDefaults';
-import { GpxFileCache } from '../cache/gpxFileCache';
 import { ElevationChart } from '../views/ElevationChart';
-
-// TODO(step 8): read from plugin settings instead of this constant.
-const SHOW_ELEVATION_CHART = true;
 
 class GpxEmbedRenderChild extends MarkdownRenderChild {
 	private mapRenderer: MapRenderer | null = null;
@@ -24,7 +21,7 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 		containerEl: HTMLElement,
 		private app: App,
 		private file: TFile,
-		private cache: GpxFileCache,
+		private plugin: GpxViewerPlugin,
 	) {
 		super(containerEl);
 	}
@@ -32,7 +29,8 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 	async onload(): Promise<void> {
 		this.containerEl.addClass('gpx-viewer-embed');
 
-		const cached = this.cache.get(this.file.path, this.file.stat.mtime);
+		const cache = this.plugin.gpxFileCache;
+		const cached = cache.get(this.file.path, this.file.stat.mtime);
 
 		let data: GpxData;
 		let stats: GpxStats;
@@ -61,30 +59,34 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 			}
 
 			stats = calculateStats(data.points);
-			this.cache.set(this.file.path, this.file.stat.mtime, { data, stats });
+			cache.set(this.file.path, this.file.stat.mtime, { data, stats });
 		}
+
+		const { tileUrl, tileAttribution, units, showElevationChart } =
+			this.plugin.settings;
 
 		const mapEl = this.containerEl.createDiv();
 		this.mapRenderer = new MapRenderer({
 			container: mapEl,
 			data,
 			compact: true,
-			tileUrl: DEFAULT_TILE_URL,
-			attribution: DEFAULT_ATTRIBUTION,
+			tileUrl,
+			attribution: tileAttribution,
 		});
 
 		this.containerEl.createDiv({
 			cls: 'gpx-viewer-embed-stats',
-			text: `${stats.distanceKm.toFixed(2)} km · ${Math.round(stats.elevationGainM)} m ↑ · ${Math.round(stats.elevationLossM)} m ↓`,
+			text: `${formatDistance(stats.distanceKm, units)} · ${formatElevation(stats.elevationGainM, units)} ↑ · ${formatElevation(stats.elevationLossM, units)} ↓`,
 		});
 
-		if (SHOW_ELEVATION_CHART) {
+		if (showElevationChart) {
 			const chartEl = this.containerEl.createDiv({
 				cls: 'gpx-viewer-elevation-chart-compact',
 			});
 			this.elevationChart = new ElevationChart({
 				container: chartEl,
 				points: data.points,
+				units,
 			});
 		}
 	}
@@ -102,9 +104,10 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 }
 
 export function createGpxEmbedProcessor(
-	app: App,
-	cache: GpxFileCache,
+	plugin: GpxViewerPlugin,
 ): MarkdownPostProcessor {
+	const { app } = plugin;
+
 	return (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 		const embeds = el.querySelectorAll<HTMLElement>('.internal-embed[src]');
 
@@ -121,7 +124,7 @@ export function createGpxEmbedProcessor(
 			const wrapper = document.createElement('div');
 			embedEl.replaceWith(wrapper);
 
-			ctx.addChild(new GpxEmbedRenderChild(wrapper, app, file, cache));
+			ctx.addChild(new GpxEmbedRenderChild(wrapper, app, file, plugin));
 		});
 	};
 }

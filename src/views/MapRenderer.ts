@@ -24,8 +24,17 @@ const START_ICON = dotIcon('gpx-viewer-marker-start');
 const END_ICON = dotIcon('gpx-viewer-marker-end');
 const WAYPOINT_ICON = dotIcon('gpx-viewer-marker-waypoint');
 
+function scheduleFrame(callback: () => void): void {
+	if (typeof requestAnimationFrame === 'function') {
+		requestAnimationFrame(callback);
+	} else {
+		setTimeout(callback, 0);
+	}
+}
+
 export class MapRenderer {
 	private map: L.Map;
+	private resizeObserver: ResizeObserver | null = null;
 
 	constructor(options: MapRendererOptions) {
 		const { container, data, compact, tileUrl, attribution } = options;
@@ -44,7 +53,24 @@ export class MapRenderer {
 		L.tileLayer(tileUrl, { attribution }).addTo(this.map);
 
 		this.drawTrack(data);
-		this.fitToTrack(data.points);
+
+		// Leaflet reads the container's pixel size synchronously at creation
+		// time. In containers whose size isn't settled yet at that point
+		// (e.g. a table cell still being laid out), the map ends up stuck at
+		// a stale, tiny size. Defer the initial bounds fit by a frame so the
+		// container has its final layout size, then keep correcting it if
+		// the container is resized later on (e.g. the table column widens).
+		scheduleFrame(() => {
+			this.map.invalidateSize();
+			this.fitToTrack(data.points);
+		});
+
+		if (typeof ResizeObserver !== 'undefined') {
+			this.resizeObserver = new ResizeObserver(() => {
+				this.map.invalidateSize();
+			});
+			this.resizeObserver.observe(container);
+		}
 	}
 
 	private drawTrack(data: GpxData): void {
@@ -91,6 +117,8 @@ export class MapRenderer {
 	}
 
 	destroy(): void {
+		this.resizeObserver?.disconnect();
+		this.resizeObserver = null;
 		this.map.remove();
 	}
 }

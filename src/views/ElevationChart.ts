@@ -9,6 +9,13 @@ import {
 } from 'chart.js';
 import { TrackPoint } from '../gpx/models';
 import { haversineDistanceKm } from '../gpx/stats';
+import {
+	Units,
+	convertDistanceKm,
+	convertElevationM,
+	distanceUnitLabel,
+	elevationUnitLabel,
+} from '../gpx/units';
 
 Chart.register(
 	LineController,
@@ -22,6 +29,7 @@ Chart.register(
 export interface ElevationChartOptions {
 	container: HTMLElement;
 	points: TrackPoint[];
+	units: Units;
 }
 
 function cumulativeDistancesKm(points: TrackPoint[]): number[] {
@@ -42,14 +50,20 @@ export class ElevationChart {
 	private chart: Chart;
 
 	constructor(options: ElevationChartOptions) {
-		const { container, points } = options;
+		const { container, points, units } = options;
 
 		container.classList.add('gpx-viewer-elevation-chart');
 		const canvas = document.createElement('canvas');
 		container.appendChild(canvas);
 
-		const distances = cumulativeDistancesKm(points);
-		const elevations = points.map((point) => point.ele ?? null);
+		const distances = cumulativeDistancesKm(points).map((km) =>
+			convertDistanceKm(km, units),
+		);
+		const elevations = points.map((point) =>
+			point.ele !== undefined ? convertElevationM(point.ele, units) : null,
+		);
+		const distUnit = distanceUnitLabel(units);
+		const eleUnit = elevationUnitLabel(units);
 
 		this.chart = new Chart(canvas, {
 			type: 'line',
@@ -72,18 +86,18 @@ export class ElevationChart {
 				maintainAspectRatio: false,
 				scales: {
 					x: {
-						title: { display: true, text: 'Distanz (km)' },
+						title: { display: true, text: `Distanz (${distUnit})` },
 					},
 					y: {
-						title: { display: true, text: 'Höhe (m)' },
+						title: { display: true, text: `Höhe (${eleUnit})` },
 					},
 				},
 				plugins: {
 					legend: { display: false },
 					tooltip: {
 						callbacks: {
-							title: (items) => `${items[0]?.label ?? '0'} km`,
-							label: (item) => `${item.formattedValue} m`,
+							title: (items) => `${items[0]?.label ?? '0'} ${distUnit}`,
+							label: (item) => `${item.formattedValue} ${eleUnit}`,
 						},
 					},
 				},
