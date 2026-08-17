@@ -1,92 +1,148 @@
-# Obsidian Sample Plugin
+# GPX Viewer
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An [Obsidian](https://obsidian.md) plugin that shows your `.gpx` track files — hikes, runs, bike tours — as an interactive map right inside your vault, with distance/elevation stats and a height profile.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Click a `.gpx` file to see the full view:
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+![Full view of a GPX file, showing the track on a map with stats and an elevation chart below it](public/trebeurden.png)
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+Or embed it in a note and see a compact preview:
 
-## First time developing plugins?
+![Compact embed preview of a GPX file inside a note](public/trebeurden_preview.png)
 
-Quick starting guide for new plugin devs:
+## Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- Opens `.gpx` files directly — click one in the file explorer and get a map, no separate app needed.
+- Embed a track in any note with `![[track.gpx]]` and get a compact map + stats (Reading Mode only).
+- Shows distance, elevation gain/loss, and a height profile chart.
+- "Open on original service" button if the GPX file links back to where it came from (e.g. Garmin, Komoot, Strava).
+- Configurable map tiles, units (metric/imperial), and whether the elevation chart is shown.
+- Works on desktop and mobile.
 
-## Releasing new releases
+## Installing
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+This plugin isn't on the community plugin list yet, so install it manually:
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest [release](../../releases).
+2. Copy them into `<YourVault>/.obsidian/plugins/gpx-viewer/`.
+3. In Obsidian, go to **Settings → Community plugins** and enable **GPX Viewer**.
 
-## Adding your plugin to the community plugin list
+## User guide
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Viewing a track
 
-## How to use
+Click any `.gpx` file in your vault. It opens in a full-page view with:
 
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+- an interactive map (pan/zoom, start marker, end marker, and any waypoints from the file)
+- a stats line: distance, elevation gain, elevation loss
+- an elevation profile chart below the map
+- an **"Auf Originaldienst öffnen"** ("Open on original service") button, if the file's metadata contains a link back to the service it was exported from
 
-## Manually installing the plugin
+Try it with the example file in this repo: `public/Trebeurden_Lannion_parcours13.2RE.gpx`.
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### Embedding a track in a note
 
-## Improve code quality with eslint
+Type `![[filename.gpx]]` in a note, e.g.:
 
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
+```
+![[Trebeurden_Lannion_parcours13.2RE.gpx]]
 ```
 
-If you have multiple URLs, you can also do:
+This shows a smaller version of the map plus a short stats line (and the elevation chart, if enabled). Two things to know:
 
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
+- **Reading Mode only.** Switch out of Live Preview/editing mode (the book icon) to see the embed — it isn't rendered while editing.
+- If you put an embed inside a **table**, give the column enough width — a very narrow column will force the map to grow past it rather than squish it unreadably small.
+
+### Settings
+
+Under **Settings → Community plugins → GPX Viewer** you can configure:
+
+| Setting | What it does | Default |
+|---|---|---|
+| Tile-URL-Vorlage | The map tile source URL template | OpenStreetMap |
+| Kartenattribution | Attribution text shown on the map | OpenStreetMap contributors |
+| Einheiten | Metric (km, m) or imperial (mi, ft) | Metric |
+| Höhenprofil anzeigen | Show/hide the elevation chart in both the full view and embeds | On |
+
+### What this plugin doesn't do
+
+By design, to keep it simple and predictable:
+
+- No multi-track rendering — multiple `<trkseg>` segments in one file are merged into a single continuous line.
+- No editing/Live Preview support for embeds — Reading Mode only.
+- No vault-wide overview or list of all your GPX files.
+- No integration with external services (Komoot, Strava, etc.) beyond reading the `<link>` tag already in the file — it never calls out to the internet on your behalf.
+- No "open with default app" / OS file association (for mobile compatibility).
+
+## Developer guide
+
+### Project structure
+
+```
+gpx-viewer/
+├── manifest.json
+├── package.json
+├── esbuild.config.mjs
+├── vitest.config.mts
+├── styles.css
+└── src/
+    ├── main.ts                    # plugin entry point (lifecycle only)
+    ├── settings.ts                 # settings interface, defaults, settings tab
+    ├── gpx/
+    │   ├── models.ts               # TrackPoint / Waypoint / GpxData
+    │   ├── parser.ts               # GPX XML → GpxData
+    │   ├── stats.ts                # distance / elevation calculations
+    │   └── units.ts                # metric ↔ imperial formatting
+    ├── views/
+    │   ├── GpxFileView.ts          # full-page view for .gpx files
+    │   ├── MapRenderer.ts          # Leaflet map (only module that knows Leaflet)
+    │   ├── ElevationChart.ts       # Chart.js elevation profile
+    │   └── mapDefaults.ts          # default tile URL/attribution
+    ├── embed/
+    │   └── gpxEmbedProcessor.ts    # Reading Mode embed (![[file.gpx]])
+    ├── cache/
+    │   └── gpxFileCache.ts         # in-memory parse cache, keyed by path+mtime
+    └── external/
+        └── sourceLink.ts           # reads the sourceLink already parsed from the file
 ```
 
-## API Documentation
+### Setup
 
-See https://docs.obsidian.md
+Requires Node.js 18+ and npm.
+
+```bash
+npm install
+npm run dev      # watch mode, rebuilds main.js on change
+```
+
+For local testing, this repo can live directly inside a vault's `.obsidian/plugins/gpx-viewer/` folder — `npm run dev` then rebuilds `main.js` in place, and reloading Obsidian (or using a hot-reload plugin) picks up the change.
+
+### Building
+
+```bash
+npm run build     # type-checks, then produces a minified main.js
+```
+
+### Testing
+
+```bash
+npm test          # runs the Vitest suite (gpx/, cache/, external/ have unit tests)
+```
+
+Unit tests cover the pure logic (`gpx/parser.ts`, `gpx/stats.ts`, `gpx/units.ts`, `cache/gpxFileCache.ts`, `external/sourceLink.ts`) using jsdom, since those don't need a live Obsidian instance. `MapRenderer` and `ElevationChart` are verified manually against Obsidian instead, since they wrap Leaflet/Chart.js rendering.
+
+### Architecture notes
+
+- **`MapRenderer` fully encapsulates Leaflet.** No other module imports `leaflet` directly. It's constructed with `{ container, data, compact, tileUrl, attribution }` and used identically for both the full view and the compact embed — `compact` just toggles controls and a CSS size class.
+- **The GPX parser throws on invalid input** (bad XML, no track/route points) rather than silently returning empty data — callers (`GpxFileView`, the embed processor) decide how to show that error.
+- **`GpxFileCache`** is a single in-memory `Map` on the plugin instance, keyed by `path + mtime`, shared between the full view and the embed processor so re-rendering an embed while scrolling doesn't reparse the file.
+- **Embeds are Reading-Mode-only** by design, implemented as a `registerMarkdownPostProcessor` that looks for `.internal-embed[src$=".gpx"]` elements Obsidian already creates for unrecognized file types, and replaces them. Each embed's Leaflet/Chart.js instances are torn down via a `MarkdownRenderChild` when the block is removed from the DOM (e.g. scrolled out or the note is re-rendered).
+- **Leaflet's map sizing gotcha:** Leaflet reads its container's pixel size synchronously at creation time. In late-laid-out containers (e.g. a table cell), that can be wrong. `MapRenderer` defers the initial bounds-fit by one frame and attaches a `ResizeObserver` to keep correcting the size afterwards.
+
+### Contributing
+
+Keep changes scoped to what's described above — multi-track rendering, a vault-wide overview, Live Preview embed support, and third-party API integrations are intentionally out of scope (see "What this plugin doesn't do"). Bug fixes and small, focused improvements are welcome.
+
+## License
+
+[MIT](LICENSE)
