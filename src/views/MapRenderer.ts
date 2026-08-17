@@ -25,10 +25,10 @@ const END_ICON = dotIcon('gpx-viewer-marker-end');
 const WAYPOINT_ICON = dotIcon('gpx-viewer-marker-waypoint');
 
 function scheduleFrame(callback: () => void): void {
-	if (typeof requestAnimationFrame === 'function') {
-		requestAnimationFrame(callback);
+	if (typeof window.requestAnimationFrame === 'function') {
+		window.requestAnimationFrame(callback);
 	} else {
-		setTimeout(callback, 0);
+		window.setTimeout(callback, 0);
 	}
 }
 

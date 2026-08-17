@@ -53,7 +53,7 @@ export class ElevationChart {
 		const { container, points, units } = options;
 
 		container.classList.add('gpx-viewer-elevation-chart');
-		const canvas = document.createElement('canvas');
+		const canvas = createEl('canvas');
 		container.appendChild(canvas);
 
 		const distances = cumulativeDistancesKm(points).map((km) =>

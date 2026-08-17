@@ -125,7 +125,7 @@ export function createGpxEmbedProcessor(
 			);
 			if (!(file instanceof TFile)) return;
 
-			const wrapper = document.createElement('div');
+			const wrapper = createDiv();
 			embedEl.replaceWith(wrapper);
 
 			ctx.addChild(new GpxEmbedRenderChild(wrapper, app, file, plugin));
