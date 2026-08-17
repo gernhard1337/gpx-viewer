@@ -21,11 +21,28 @@ Or embed it in a note and see a compact preview:
 
 ## Installing
 
-This plugin isn't on the community plugin list yet, so install it manually:
+This plugin isn't on the community plugin list yet, so install it manually — either from a prebuilt release or by building it yourself.
+
+### Option A: Download a release
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the latest [release](../../releases).
 2. Copy them into `<YourVault>/.obsidian/plugins/gpx-viewer/`.
 3. In Obsidian, go to **Settings → Community plugins** and enable **GPX Viewer**.
+
+### Option B: Build it yourself
+
+Requires Node.js 18+ and npm.
+
+1. Clone this repo (or download the source) into `<YourVault>/.obsidian/plugins/gpx-viewer/`.
+2. Inside that folder, run:
+   ```bash
+   npm install
+   npm run build
+   ```
+   This produces `main.js` next to the existing `manifest.json` and `styles.css` — no separate copy step needed, since the repo already lives in the plugins folder.
+3. In Obsidian, go to **Settings → Community plugins**, click the reload icon (or restart Obsidian) so it picks up the new plugin folder, and enable **GPX Viewer**.
+
+See [Developer guide](#developer-guide) below for `npm run dev` (watch mode) if you plan on changing the code.
 
 ## User guide
 
