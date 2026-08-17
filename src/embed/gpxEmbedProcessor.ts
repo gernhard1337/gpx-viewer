@@ -11,9 +11,14 @@ import { GpxData } from '../gpx/models';
 import { MapRenderer } from '../views/MapRenderer';
 import { DEFAULT_TILE_URL, DEFAULT_ATTRIBUTION } from '../views/mapDefaults';
 import { GpxFileCache } from '../cache/gpxFileCache';
+import { ElevationChart } from '../views/ElevationChart';
+
+// TODO(step 8): read from plugin settings instead of this constant.
+const SHOW_ELEVATION_CHART = true;
 
 class GpxEmbedRenderChild extends MarkdownRenderChild {
 	private mapRenderer: MapRenderer | null = null;
+	private elevationChart: ElevationChart | null = null;
 
 	constructor(
 		containerEl: HTMLElement,
@@ -72,11 +77,23 @@ class GpxEmbedRenderChild extends MarkdownRenderChild {
 			cls: 'gpx-viewer-embed-stats',
 			text: `${stats.distanceKm.toFixed(2)} km · ${Math.round(stats.elevationGainM)} m ↑ · ${Math.round(stats.elevationLossM)} m ↓`,
 		});
+
+		if (SHOW_ELEVATION_CHART) {
+			const chartEl = this.containerEl.createDiv({
+				cls: 'gpx-viewer-elevation-chart-compact',
+			});
+			this.elevationChart = new ElevationChart({
+				container: chartEl,
+				points: data.points,
+			});
+		}
 	}
 
 	onunload(): void {
 		this.mapRenderer?.destroy();
 		this.mapRenderer = null;
+		this.elevationChart?.destroy();
+		this.elevationChart = null;
 	}
 
 	private renderError(message: string): void {

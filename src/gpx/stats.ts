@@ -12,7 +12,7 @@ function toRadians(deg: number): number {
 	return (deg * Math.PI) / 180;
 }
 
-function haversineDistanceKm(a: TrackPoint, b: TrackPoint): number {
+export function haversineDistanceKm(a: TrackPoint, b: TrackPoint): number {
 	const dLat = toRadians(b.lat - a.lat);
 	const dLon = toRadians(b.lon - a.lon);
 	const lat1 = toRadians(a.lat);

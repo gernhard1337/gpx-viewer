@@ -6,11 +6,16 @@ import { MapRenderer } from './MapRenderer';
 import { DEFAULT_TILE_URL, DEFAULT_ATTRIBUTION } from './mapDefaults';
 import { GpxFileCache } from '../cache/gpxFileCache';
 import { getSourceLink } from '../external/sourceLink';
+import { ElevationChart } from './ElevationChart';
 
 export const VIEW_TYPE_GPX = 'gpx-file-view';
 
+// TODO(step 8): read from plugin settings instead of this constant.
+const SHOW_ELEVATION_CHART = true;
+
 export class GpxFileView extends FileView {
 	private mapRenderer: MapRenderer | null = null;
+	private elevationChart: ElevationChart | null = null;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -47,6 +52,8 @@ export class GpxFileView extends FileView {
 	private cleanup(): void {
 		this.mapRenderer?.destroy();
 		this.mapRenderer = null;
+		this.elevationChart?.destroy();
+		this.elevationChart = null;
 	}
 
 	private async render(file: TFile): Promise<void> {
@@ -100,6 +107,14 @@ export class GpxFileView extends FileView {
 
 		this.renderStats(contentEl, stats);
 		this.renderSourceLink(contentEl, data);
+
+		if (SHOW_ELEVATION_CHART) {
+			const chartEl = contentEl.createDiv();
+			this.elevationChart = new ElevationChart({
+				container: chartEl,
+				points: data.points,
+			});
+		}
 	}
 
 	private renderStats(container: HTMLElement, stats: GpxStats): void {

@@ -641,3 +641,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .gpx-viewer-source-link:hover {
 	background: var(--interactive-hover);
 }
+
+.gpx-viewer-elevation-chart {
+	position: relative;
+	height: 180px;
+	margin-top: var(--size-4-4);
+}
+
+.gpx-viewer-elevation-chart-compact {
+	height: 100px;
+	margin-top: var(--size-4-2);
+}
